@@ -11,15 +11,16 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping("/reports")
+@RequestMapping("/api/v1/reports")
 @RequiredArgsConstructor
 public class ReportController {
 
     private final ReportUseCase reportUseCase;
 
-    @GetMapping
+
+    @GetMapping("/{customerId}")
     public List<ReportResponse> getReport(
-            @RequestParam String customerId,
+            @PathVariable String customerId,
             @RequestParam
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             LocalDate startDate,
