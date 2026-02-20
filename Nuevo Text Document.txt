@@ -1,0 +1,39 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/bankin_db
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  spring:
+    kafka:
+      bootstrap-servers: localhost:9092
+      consumer:
+        group-id: account-service-group
+        auto-offset-reset: earliest
+        value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+        key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+        properties:
+          spring.json.trusted.packages: "*"
+
+
+
+  autoconfigure:
+    exclude: ""
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs

@@ -1,0 +1,224 @@
+openapi: 3.0.3
+info:
+  title: Account Service API
+  version: 1.0.0
+  description: Account and Movement management service
+
+servers:
+  - url: http://localhost:8081
+
+paths:
+
+  /api/v1/accounts:
+    post:
+      summary: Create account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAccountRequest'
+      responses:
+        '201':
+          description: Account created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountResponse'
+
+    get:
+      summary: Get all accounts
+      responses:
+        '200':
+          description: List of accounts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AccountResponse'
+
+  /api/v1/accounts/{id}:
+    get:
+      summary: Get account by id
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Account found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountResponse'
+        '404':
+          description: Account not found
+
+    delete:
+      summary: Delete account
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Account deleted
+
+  /api/v1/movements:
+    post:
+      summary: Create movement
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMovementRequest'
+      responses:
+        '201':
+          description: Movement created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MovementResponse'
+        '400':
+          description: Business error (Saldo no disponible)
+
+  /reports/{clientId}:
+    get:
+      summary: Account statement report
+      parameters:
+        - in: path
+          name: clientId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: startDate
+          required: true
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: endDate
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Account statement report
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportResponse'
+
+components:
+
+  schemas:
+
+    CreateAccountRequest:
+      type: object
+      required:
+        - number
+        - type
+        - initialBalance
+        - state
+        - customerId
+      properties:
+        number:
+          type: string
+        type:
+          type: string
+          enum: [SAVINGS, CHECKING]
+        initialBalance:
+          type: number
+          format: double
+        state:
+          type: boolean
+        customerId:
+          type: string
+          format: uuid
+
+    AccountResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        number:
+          type: string
+        type:
+          type: string
+        balance:
+          type: number
+        state:
+          type: boolean
+        customerId:
+          type: string
+          format: uuid
+
+    CreateMovementRequest:
+      type: object
+      required:
+        - accountId
+        - type
+        - value
+      properties:
+        accountId:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum: [DEBIT, CREDIT]
+        value:
+          type: number
+
+    MovementResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        date:
+          type: string
+          format: date-time
+        type:
+          type: string
+        value:
+          type: number
+        balance:
+          type: number
+        accountId:
+          type: string
+          format: uuid
+
+    ReportResponse:
+      type: object
+      properties:
+        customerId:
+          type: string
+          format: uuid
+        accounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/AccountReportItem'
+
+    AccountReportItem:
+      type: object
+      properties:
+        accountNumber:
+          type: string
+        balance:
+          type: number
+        movements:
+          type: array
+          items:
+            $ref: '#/components/schemas/MovementResponse'
